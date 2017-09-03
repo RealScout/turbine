@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: |
   the stack of airflow resources.
 Parameters:
-  ## Networking
+## Networking
   VPC:
     Description: >-
       The VPC in which all resources are going to reside.
@@ -63,6 +63,14 @@ Parameters:
     AllowedValues:
       - t2.micro
       - m4.large
+## Storage
+  DbMasterUsername:
+    Description: The username to be used in the airflow database.
+    Type: String
+  DbMasterPassword:
+    Description: The password to be used in the airflow database.
+    Type: String
+    NoEcho: true
 Resources:
 ## Instances
   Scheduler:
@@ -786,12 +794,15 @@ Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
       - Label:
-          default: Database Configuration
+          default: Networking
         Parameters:
-          - DbMasterUsername
-          - DbMasterPassword
+          - VPC
+          - StackSubnet
+          - DummySubnet
+          - FileMountIp
+          - KeyPair
       - Label:
-          default: Autoscaling Configuration
+          default: Scaling
         Parameters:
           - MinGroupSize
           - MaxGroupSize
@@ -799,13 +810,10 @@ Metadata:
           - GrowthThreshold
           - SpotInstanceType
       - Label:
-          default: Networking Configuration
+          default: Storage
         Parameters:
-          - VPC
-          - StackSubnet
-          - DummySubnet
-          - FileMountIp
-          - KeyPair
+          - DbMasterUsername
+          - DbMasterPassword
     ParameterLabels:
       DbMasterPassword:
         default: Postgres Password
