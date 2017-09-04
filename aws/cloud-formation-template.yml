@@ -7,22 +7,21 @@ Parameters:
     Description: >-
       The VPC in which all resources are going to reside.
     Type: AWS::EC2::VPC::Id
-  StackSubnet:
+  VpcCidrBlock:
     Description: >-
-      The Subnet in which the default and scaled instances are going to reside.
-    Type: AWS::EC2::Subnet::Id
+      The IPv4 CIDR block to be used in the VPC. Will be used to define Security Group
+      ingress rules.
+    Type: String
+    Default: 10.0.0.0/16
   DummySubnet:
     Description: >-
       An extra Subnet used to fulfill the 2 AZ requirement for RDS.
       No computing resource will reside in it.
     Type: AWS::EC2::Subnet::Id
-  DbMasterUsername:
-    Description: The username to be used in the airflow database.
-    Type: String
-  DbMasterPassword:
-    Description: The password to be used in the airflow database.
-    Type: String
-    NoEcho: true
+  StackSubnet:
+    Description: >-
+      The Subnet in which the default and scaled instances are going to reside.
+    Type: AWS::EC2::Subnet::Id
   FileMountIp:
     Description: >-
       A valid and free private IP address inside the StackSubnet to be given to
@@ -108,11 +107,11 @@ Resources:
           commands:
             mount:
               test: test ! "$(mount | grep efs)"
-              command: |
+              command: !Sub |
                 mkdir -p /efs
                 mount -t nfs4 -o \
                   nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 \
-                  10.0.0.9:/ /efs
+                  ${FileMountIp}:/ /efs
                 chown -R ec2-user /efs
         runtime:
           packages:
@@ -266,11 +265,11 @@ Resources:
           commands:
             mount:
               test: test ! "$(mount | grep efs)"
-              command: |
+              command: !Sub |
                 mkdir -p /efs
                 mount -t nfs4 -o \
                   nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 \
-                  10.0.0.9:/ /efs
+                  ${FileMountIp}:/ /efs
                 chown -R ec2-user /efs
         runtime:
           packages:
@@ -432,11 +431,11 @@ Resources:
           commands:
             mount:
               test: test ! "$(mount | grep efs)"
-              command: |
+              command: !Sub |
                 mkdir -p /efs
                 mount -t nfs4 -o \
                   nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 \
-                  10.0.0.9:/ /efs
+                  ${FileMountIp}:/ /efs
                 chown -R ec2-user /efs
         runtime:
           packages:
@@ -659,6 +658,12 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: 361321d9-8ef0-4ec0-9f90-32079fd42268
+  Tasks:
+    Type: 'AWS::SQS::Queue'
+    Properties: {}
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 0c03e033-c2e8-487d-a0e9-a5bf5e851fcb
 ## Security
   Access:
     Type: 'AWS::EC2::SecurityGroup'
@@ -668,7 +673,7 @@ Resources:
         Security Rules with permissions for the shared filesystem across Airflow
         instances.
       SecurityGroupIngress:
-        - CidrIp: 10.0.0.0/16
+        - CidrIp: !Ref VpcCidrBlock
           IpProtocol: TCP
           FromPort: 2049
           ToPort: 2049
@@ -684,7 +689,7 @@ Resources:
         Security Rules with permissions for node intercommunication between
         Airflow instances and remote access.
       SecurityGroupIngress:
-        - CidrIp: 10.0.0.0/16
+        - CidrIp: !Ref VpcCidrBlock
           IpProtocol: TCP
           FromPort: 8793
           ToPort: 8793
@@ -704,7 +709,7 @@ Resources:
         Security Rules with permissions for node itercommunication between
         Airflow worker instances.
       SecurityGroupIngress:
-        - CidrIp: 10.0.0.0/16
+        - CidrIp: !Ref VpcCidrBlock
           IpProtocol: TCP
           FromPort: 8793
           ToPort: 8793
@@ -739,9 +744,10 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupName: TurbineDbConnSG
-      GroupDescription: Security Rules with permissions for database connections for Airflow.
+      GroupDescription: >-
+        Security Rules with permissions for database connections for Airflow.
       SecurityGroupIngress:
-        - CidrIp: 10.0.0.0/16
+        - CidrIp: !Ref VpcCidrBlock
           IpProtocol: TCP
           FromPort: 5432
           ToPort: 5432
@@ -784,12 +790,6 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: ac6b099f-6230-48a7-b672-6491406dde55
-  Tasks:
-    Type: 'AWS::SQS::Queue'
-    Properties: {}
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 0c03e033-c2e8-487d-a0e9-a5bf5e851fcb
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -797,6 +797,7 @@ Metadata:
           default: Networking
         Parameters:
           - VPC
+          - VpcCidrBlock
           - StackSubnet
           - DummySubnet
           - FileMountIp
