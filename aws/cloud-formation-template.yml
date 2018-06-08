@@ -496,9 +496,9 @@ Resources:
               libxml2-devel: []
               libxslt-devel: []
               postgresql95-devel: []
-              python35: []
-              python35-devel: []
-              python35-pip: []
+              python36: []
+              python36-devel: []
+              python36-pip: []
           files:
             /etc/environment:
               content: !Sub
@@ -542,7 +542,7 @@ Resources:
                 su -c '/usr/local/bin/airflow initdb' ec2-user
             installreqs:
               test: test -f /efs/airflow/requirements.txt
-              command: pip-3.5 install -r /efs/airflow/requirements.txt
+              command: pip-3.6 install -r /efs/airflow/requirements.txt
         supervision:
           packages:
             yum:
