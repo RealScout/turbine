@@ -11,7 +11,7 @@ https://github.com/villasv/turbine/releases
 
 Turbine is the set of bare metals behind a simple yet complete and efficient Airflow setup. Deploy in a few clicks, configure in a few commands, personalize in a few fields.
 
-![Designer](https://raw.githubusercontent.com/villasv/turbine/master/aws/cloud-formation-designer.png)
+![Designer](https://raw.githubusercontent.com/realscout/turbine/master/aws/cloud-formation-designer.png)
 
 ## Overview
 
@@ -29,11 +29,11 @@ You will need a key file generated in the AWS console to be associated with the 
 
 ### 1. Deploy the Cloud Formation Stack
 
-Create a new stack using the YAML definition at [`aws\cloud-formation-template.yml`](https://raw.githubusercontent.com/villasv/turbine/master/aws/cloud-formation-template.yml).
+Create a new stack using the YAML definition at [`aws\cloud-formation-template.yml`](https://raw.githubusercontent.com/realscout/turbine/master/aws/cloud-formation-template.yml).
     
 The following button will readily deploy the template (defaults to your last used region):
     
-[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://s3.amazonaws.com/villasv/turbine/aws/cloud-formation-template.yml)
+[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://s3.amazonaws.com/realscout/turbine/aws/cloud-formation-template.yml)
 
 ### 2. Setup your Airflow files
 
